@@ -5,8 +5,8 @@ def Extract_YT_Comments(video_id, youtube):
 
   # Video Title
   video_request = youtube.videos().list(
-    part = 'snippet',
-    id = video_id
+      part = 'snippet',
+      id = video_id
   )
   video_response = video_request.execute()
   video_title = video_response['items'][0]['snippet']['title']
@@ -24,7 +24,7 @@ def Extract_YT_Comments(video_id, youtube):
     for item in response['items']:
       comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
       username = item['snippet']['topLevelComment']['snippet']['authorDisplayName']
-      comments.append((comment, username, video_title))
+      comments.append((comment, username, video_title, video_id))
 
     next_page_token = response.get('nextPageToken')
     if not next_page_token:
@@ -51,8 +51,8 @@ def Extract_Reddit_Comments(post_url, reddit_client):
   # Iterate through each comment and collect the data
   for comment in submission.comments.list():
     # Extract the comment text, post title, and username
-    comment = comment.body
+    comment_text = comment.body
     username = comment.author.name if comment.author else "Anonymous"
-    comments_data.append((comment, username, post_title))
+    comments_data.append((comment_text, username, post_title, post_url))
 
   return comments_data
