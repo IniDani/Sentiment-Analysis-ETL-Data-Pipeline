@@ -93,3 +93,30 @@ def RDTcomments_to_Dataframe(comments):
   df.rename(columns = {'index': 'ID'}, inplace = True)
 
   return df
+
+
+
+# ---|   Functions to convert columns to string data type   |---
+def YTcolumn_to_string(df):
+  df['Comment'] = df['Comment'].astype(str)
+  df['Username'] = df['Username'].astype(str)
+  df['Video Title'] = df['Video Title'].astype(str)
+  df['Video ID'] = df['Video ID'].astype(str)
+  
+  return df
+
+def RDTcolumn_to_string(df):
+  df['Comment'] = df['Comment'].astype(str)
+  df['Username'] = df['Username'].astype(str)
+  df['Post Title'] = df['Post Title'].astype(str)
+  df['Post URL'] = df['Post URL'].astype(str)
+  
+  return df
+
+
+
+# ---|   Functions to remove first character in YouTube username   |---
+def remove_first_character_in_username(df):
+  df['Username'] = df['Username'].str.slice(1)  # First character is always "@"
+
+  return df
