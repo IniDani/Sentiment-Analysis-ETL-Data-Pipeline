@@ -5,6 +5,7 @@ import pandas as pd
 
 from src.Credentials import YOUTUBE_API_KEY
 from src.Credentials import REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT
+from src.Credentials import POSTGRESQL_HOST, POSTGRESQL_PORT, POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE
 
 from ETL_Functions.Extract_Functions import (
     Get_Next_Video_ID,
@@ -28,7 +29,7 @@ from ETL_Functions.Transform_Functions import (
     RDT_Organize_Column
 )
 
-import ETL_Functions.Load_Functions
+from ETL_Functions.Load_Functions import Load_Dataframe_To_PostgreSQL
 
 
 
@@ -88,6 +89,10 @@ def Combine_Dataframes(YT_df, RDT_df):
     Combined_Dataframe = pd.concat([YT_df, RDT_df], ignore_index = True)
 
     return Combined_Dataframe
+
+def Load_Data_To_PostgreSQL(df):
+    table_name = ''
+    Load_Dataframe_To_PostgreSQL(df, table_name, POSTGRESQL_HOST, POSTGRESQL_PORT, POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE)
 
 
 
@@ -166,5 +171,14 @@ with DAG(
 
 
 
+    # Task: Load Dataframe to Database
+    load_task = PythonOperator(
+        task_id = 'Load_Data_To_PostgreSQL',
+        python_callable = Load_Data_To_PostgreSQL,
+        op_args = ["{{ task_instance.xcom_pull(task_ids='Combine_Dataframes') }}"]
+    )
+
+
+
     # Set Task Dependencies
-    [get_video_id_task, get_reddit_url_task] >> [extract_youtube_task, extract_reddit_task] >> [transform_youtube_task, transform_reddit_task] >> combine_task
+    [get_video_id_task, get_reddit_url_task] >> [extract_youtube_task, extract_reddit_task] >> [transform_youtube_task, transform_reddit_task] >> combine_task >> load_task
