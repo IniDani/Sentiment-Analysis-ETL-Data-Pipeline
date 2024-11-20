@@ -1,33 +1,53 @@
+import logging
+
 # Function to get the next YouTube video ID from the file
-def Get_Next_Video_ID(videoIDpath):
-    with open(videoIDpath, 'r') as file:
-        video_ids = file.readlines()
-    if not video_ids:
-        raise ValueError("No more video IDs to process.")
-    
-    next_video_id = video_ids[0].strip()  # Get the first video ID
+def Get_Next_Video_ID():
+    videoIDpath = '/home/DanFaRa/airflow/dags/resources/video_ids.txt'
+    try:
+        with open(videoIDpath, 'r') as file:
+            video_ids = file.readlines()
+        if not video_ids:
+            raise ValueError("No more video IDs to process.")
+        
+        next_video_id = video_ids[0].strip()  # Get the first video ID
 
-    # Update the file by removing the processed ID
-    with open(videoIDpath, 'w') as file:
-        file.writelines(video_ids[1:])  # Remove the first line
-
-    return next_video_id
+        # Update the file by removing the processed ID
+        with open(videoIDpath, 'w') as file:
+            file.writelines(video_ids[1:])  # Remove the first line
+        
+        logging.info(f"Next video ID: {next_video_id}")
+        return next_video_id
+    except FileNotFoundError:
+        logging.error(f"The file {videoIDpath} does not exist.")
+        raise
+    except Exception as e:
+        logging.error(f"Error in Get_Next_Video_ID: {e}")
+        raise
 
 # Function to get the next Reddit post URL from the file
-def Get_Next_Reddit_Post_URL(redditURLpath):
-    with open(redditURLpath, 'r') as file:
-        reddit_urls = file.readlines()
+def Get_Next_Reddit_Post_URL():
+    redditURLpath = '/home/DanFaRa/airflow/dags/resources/redditpost_url.txt'
+    try:
+        with open(redditURLpath, 'r') as file:
+            reddit_urls = file.readlines()
 
-    if not reddit_urls:
-        raise ValueError("No more Reddit URLs to process.")
-    
-    next_reddit_url = reddit_urls[0].strip()  # Get the first Reddit post URL
-    
-    # Update the file by removing the processed URL
-    with open(redditURLpath, 'w') as file:
-        file.writelines(reddit_urls[1:])  # Remove the first line
-    
-    return next_reddit_url
+        if not reddit_urls:
+            raise ValueError("No more Reddit URLs to process.")
+        
+        next_reddit_url = reddit_urls[0].strip()  # Get the first Reddit post URL
+        
+        # Update the file by removing the processed URL
+        with open(redditURLpath, 'w') as file:
+            file.writelines(reddit_urls[1:])  # Remove the first line
+        
+        logging.info(f"Next post URL: {next_reddit_url}")
+        return next_reddit_url
+    except FileNotFoundError:
+        logging.error(f"The file {redditURLpath} does not exist.")
+        raise
+    except Exception as e:
+        logging.error(f"Error in Get_Next_Reddit_Post_ID: {e}")
+        raise
 
 
 

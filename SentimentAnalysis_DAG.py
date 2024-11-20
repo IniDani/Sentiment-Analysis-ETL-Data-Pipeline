@@ -1,5 +1,6 @@
 from airflow import DAG
 from airflow.operators.python import PythonOperator
+from airflow.operators.dummy import DummyOperator
 from datetime import datetime
 import pandas as pd
 
@@ -34,13 +35,13 @@ from ETL_Functions.Load_Functions import Load_Dataframe_To_PostgreSQL
 
 
 # File paths for video IDs and Reddit post URLs
-VIDEO_IDS_FILE = 'resources/video_ids.txt'
-REDDIT_POSTS_FILE = 'resources/redditpost_url.txt'
+# VIDEO_IDS_FILE = '/home/DanFaRa/airflow/dags/resources/video_ids.txt'
+# REDDIT_POSTS_FILE = '/home/DanFaRa/airflow/dags/resources/redditpost_url.txt'
 
 
 
 # Define Utility Functions
-def Extract_Comments_from_YouTube(video_id):
+def Extract_Comments_from_YouTube():
     from googleapiclient.discovery import build
 
     youtube = build('youtube', 'v3', developerKey = YOUTUBE_API_KEY)
@@ -106,12 +107,15 @@ default_args = {
 
 # Define the DAG
 with DAG(
-    'Sentiment Analysis_ETL',
+    'Sentiment_Analysis_ETL',
     default_args = default_args,
     description = 'ETL pipeline for sentiment analysis',
     schedule_interval = '@daily',
     catchup = False
 ) as dag:
+
+    # Dummy Start Task
+    start_task = DummyOperator(task_id = 'start')
     
     # Task: Get the next YouTube video ID
     get_video_id_task = PythonOperator(
@@ -181,4 +185,7 @@ with DAG(
 
 
     # Set Task Dependencies
-    [get_video_id_task, get_reddit_url_task] >> [extract_youtube_task, extract_reddit_task] >> [transform_youtube_task, transform_reddit_task] >> combine_task >> load_task
+    start_task >> [get_video_id_task, get_reddit_url_task]
+    get_video_id_task >> extract_youtube_task >> transform_youtube_task >> combine_task
+    get_reddit_url_task >> extract_reddit_task >> transform_reddit_task >> combine_task
+    # combine_task >> load_task
