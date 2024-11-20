@@ -10,7 +10,20 @@ from ETL_Functions.Extract_Functions import (
     Extract_YT_Comments,
     Extract_Reddit_Comments
 )
-import ETL_Functions.Transform_Functions
+from ETL_Functions.Transform_Functions import (
+    YT_Convert_Emoji_to_Text,
+    RDT_Convert_Emoji_to_Text,
+    YT_HandleHTML,
+    RDT_HandleHTML,
+    YTcomments_to_Dataframe,
+    RDTcomments_to_Dataframe,
+    YTcolumn_to_string,
+    RDTcolumn_to_string,
+    remove_first_character_in_username,
+    Sentiment_Analysis,
+    YT_Organize_Column,
+    RDT_Organize_Column
+)
 import ETL_Functions.Load_Functions
 
 # Default arguments for the DAG
@@ -51,3 +64,34 @@ with DAG(
         post_url = 'https://www.reddit.com/r/movies/comments/1ff3566/transformers_one_review_thread/'
 
         return Extract_Reddit_Comments(post_url, reddit)
+    
+
+
+    # Task: Transform YouTube comments
+    def Transform_YouTube_Comments(YT_comments):
+        YT_comments = YT_Convert_Emoji_to_Text(YT_comments)
+        YT_comments = YT_HandleHTML(YT_comments)
+
+        YT_dataframe = YTcomments_to_Dataframe(YT_comments)
+        YT_dataframe = YTcolumn_to_string(YT_dataframe)
+        YT_dataframe = remove_first_character_in_username(YT_dataframe)
+
+        # Sentiment Analysis
+        YT_dataframe = Sentiment_Analysis(YT_dataframe)
+        YT_dataframe = YT_Organize_Column(YT_dataframe)
+
+        return YT_dataframe
+    
+    # Task: Transform YouTube comments
+    def Transform_Reddit_Comments(RDT_comments):
+        RDT_comments = RDT_Convert_Emoji_to_Text(RDT_comments)
+        RDT_comments = RDT_HandleHTML(RDT_comments)
+
+        RDT_dataframe = RDTcomments_to_Dataframe(RDT_comments)
+        RDT_dataframe = RDTcolumn_to_string(RDT_dataframe)
+        
+        # Sentiment Analysis
+        RDT_dataframe = Sentiment_Analysis(RDT_dataframe)
+        RDT_dataframe = RDT_Organize_Column(RDT_dataframe)
+
+        return RDT_dataframe
