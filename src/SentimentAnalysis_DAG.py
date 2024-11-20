@@ -126,14 +126,14 @@ with DAG(
     extract_youtube_task = PythonOperator(
         task_id = 'Extract_Comments_from_YouTube',
         python_callable = Extract_Comments_from_YouTube,
-        op_args = [get_video_id_task.output]
+        op_args = ["{{ task_instance.xcom_pull(task_ids='Get_Next_Video_ID') }}"]
     )
     
     # Task: Extract Reddit comments
     extract_reddit_task = PythonOperator(
         task_id = 'Extract_Comments_from_Reddit',
         python_callable = Extract_Comments_from_Reddit,
-        op_args = [get_reddit_url_task.output]
+        op_args = ["{{ task_instance.xcom_pull(task_ids='Get_Next_Reddit_Post_URL') }}"]
     )
     
 
@@ -142,14 +142,14 @@ with DAG(
     transform_youtube_task = PythonOperator(
         task_id = 'Transform_YouTube_Comments',
         python_callable = Transform_YouTube_Comments,
-        op_args = [extract_youtube_task.output]
+        op_args = ["{{ task_instance.xcom_pull(task_ids='Extract_Comments_from_YouTube') }}"]
     )
     
     # Task: Transform Reddit comments
     transform_reddit_task = PythonOperator(
         task_id = 'Transform_Reddit_Comments',
         python_callable = Transform_Reddit_Comments,
-        op_args = [extract_reddit_task.output]
+        op_args = ["{{ task_instance.xcom_pull(task_ids='Extract_Comments_from_Reddit') }}"]
     )
     
 
@@ -158,7 +158,10 @@ with DAG(
     combine_task = PythonOperator(
         task_id = 'Combine_Dataframes',
         python_callable = Combine_Dataframes,
-        op_args = [transform_youtube_task.output, transform_reddit_task.output]
+        op_args = [
+            "{{ task_instance.xcom_pull(task_ids='Transform_YouTube_Comments') }}",
+            "{{ task_instance.xcom_pull(task_ids='Transform_Reddit_Comments') }}"
+        ]
     )
 
 
