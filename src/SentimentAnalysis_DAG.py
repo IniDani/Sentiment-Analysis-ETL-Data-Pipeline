@@ -10,6 +10,7 @@ from ETL_Functions.Extract_Functions import (
     Extract_YT_Comments,
     Extract_Reddit_Comments
 )
+
 from ETL_Functions.Transform_Functions import (
     YT_Convert_Emoji_to_Text,
     RDT_Convert_Emoji_to_Text,
@@ -24,7 +25,10 @@ from ETL_Functions.Transform_Functions import (
     YT_Organize_Column,
     RDT_Organize_Column
 )
+
 import ETL_Functions.Load_Functions
+
+
 
 # Default arguments for the DAG
 default_args = {
@@ -108,30 +112,30 @@ with DAG(
 
     # Airflow Tasks
     extract_youtube_task = PythonOperator(
-        task_id = 'Extract_Comments_from_YouTube'
+        task_id = 'Extract_Comments_from_YouTube',
         python_callable = Extract_Comments_from_YouTube
     )
 
     extract_reddit_task = PythonOperator(
-        task_id = 'Extract_Comments_from_Reddit'
+        task_id = 'Extract_Comments_from_Reddit',
         python_callable = Extract_Comments_from_Reddit
     )
 
     transform_youtube_task = PythonOperator(
-        task_id = 'Transform_YouTube_Comments'
-        python_callable = Transform_YouTube_Comments
+        task_id = 'Transform_YouTube_Comments',
+        python_callable = Transform_YouTube_Comments,
         op_args = [extract_youtube_task.output]
     )
 
     transform_reddit_task = PythonOperator(
-        task_id = 'Transform_Reddit_Comments'
-        python_callable = Transform_Reddit_Comments
+        task_id = 'Transform_Reddit_Comments',
+        python_callable = Transform_Reddit_Comments,
         op_args = [extract_reddit_task.output]
     )
 
     combine_task = PythonOperator(
-        task_id = 'Combine_Dataframes'
-        python_callable = Combine_Dataframes
+        task_id = 'Combine_Dataframes',
+        python_callable = Combine_Dataframes,
         op_args = [transform_youtube_task.output, transform_reddit_task.output]
     )
 
