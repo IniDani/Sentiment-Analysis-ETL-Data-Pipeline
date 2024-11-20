@@ -91,7 +91,7 @@ def Combine_Dataframes(YT_df, RDT_df):
     return Combined_Dataframe
 
 def Load_Data_To_PostgreSQL(df):
-    table_name = ''
+    table_name = 'data_etl'
     Load_Dataframe_To_PostgreSQL(df, table_name, POSTGRESQL_HOST, POSTGRESQL_PORT, POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE)
 
 
