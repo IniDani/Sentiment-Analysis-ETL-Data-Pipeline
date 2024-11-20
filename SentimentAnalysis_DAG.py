@@ -3,9 +3,9 @@ from airflow.operators.python import PythonOperator
 from datetime import datetime
 import pandas as pd
 
-from src.Credentials import YOUTUBE_API_KEY
-from src.Credentials import REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT
-from src.Credentials import POSTGRESQL_HOST, POSTGRESQL_PORT, POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE
+from Credentials import YOUTUBE_API_KEY
+from Credentials import REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT
+from Credentials import POSTGRESQL_HOST, POSTGRESQL_PORT, POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE
 
 from ETL_Functions.Extract_Functions import (
     Get_Next_Video_ID,
@@ -34,8 +34,8 @@ from ETL_Functions.Load_Functions import Load_Dataframe_To_PostgreSQL
 
 
 # File paths for video IDs and Reddit post URLs
-VIDEO_IDS_FILE = 'src/resources/video_ids.txt'
-REDDIT_POSTS_FILE = 'src/resources/redditpost_url.txt'
+VIDEO_IDS_FILE = 'resources/video_ids.txt'
+REDDIT_POSTS_FILE = 'resources/redditpost_url.txt'
 
 
 
