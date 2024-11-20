@@ -1,3 +1,36 @@
+# Function to get the next YouTube video ID from the file
+def Get_Next_Video_ID(videoIDpath):
+    with open(videoIDpath, 'r') as file:
+        video_ids = file.readlines()
+    if not video_ids:
+        raise ValueError("No more video IDs to process.")
+    
+    next_video_id = video_ids[0].strip()  # Get the first video ID
+
+    # Update the file by removing the processed ID
+    with open(videoIDpath, 'w') as file:
+        file.writelines(video_ids[1:])  # Remove the first line
+
+    return next_video_id
+
+# Function to get the next Reddit post URL from the file
+def Get_Next_Reddit_Post_URL(redditURLpath):
+    with open(redditURLpath, 'r') as file:
+        reddit_urls = file.readlines()
+
+    if not reddit_urls:
+        raise ValueError("No more Reddit URLs to process.")
+    
+    next_reddit_url = reddit_urls[0].strip()  # Get the first Reddit post URL
+    
+    # Update the file by removing the processed URL
+    with open(redditURLpath, 'w') as file:
+        file.writelines(reddit_urls[1:])  # Remove the first line
+    
+    return next_reddit_url
+
+
+
 # Function to Extract Comments from a YouTube video using YouTube API
 def Extract_YT_Comments(video_id, youtube):
   comments = []
