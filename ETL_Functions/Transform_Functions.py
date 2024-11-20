@@ -163,8 +163,8 @@ def Sentiment_Analysis(df):
 
 
 
-# ---|   Functions for Cleaning Columns   |---
-def YT_Clean_Column(df):
+# ---|   Functions for Organizing Columns   |---
+def YT_Organize_Column(df):
   # Drop columns
   df = df.drop(columns = ['ID', 'Username', 'Video ID', 'Sentiment'])
 
@@ -176,7 +176,7 @@ def YT_Clean_Column(df):
 
   return df
 
-def RDT_Clean_Column(df):
+def RDT_Organize_Column(df):
   # Drop columns
   df = df.drop(columns = ['ID', 'Username', 'Post URL', 'Sentiment'])
 
