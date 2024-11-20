@@ -7,4 +7,5 @@
 
 ## Link
 Link YouTube: 
-Link Notion: https://angry-fight-888.notion.site/Artikel-Sentiment-Analysis-Data-Pipeline-144fdade05f0800e9840fa79f7b59d6e?pvs=4
+
+[Link Notion](https://angry-fight-888.notion.site/Artikel-Sentiment-Analysis-Data-Pipeline-144fdade05f0800e9840fa79f7b59d6e?pvs=4)
