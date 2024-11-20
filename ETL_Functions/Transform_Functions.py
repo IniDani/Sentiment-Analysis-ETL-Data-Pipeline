@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from transformers import pipeline
 import html
 import emoji
 import pandas as pd
@@ -119,4 +120,43 @@ def RDTcolumn_to_string(df):
 def remove_first_character_in_username(df):
   df['Username'] = df['Username'].str.slice(1)  # First character is always "@"
 
+  return df
+
+
+
+# ---|   Functions for Sentiment Analysis   |---
+def Sentiment_Analysis(df):
+  sentiment_analyzer = pipeline("sentiment-analysis", model = "distilbert-base-uncased-finetuned-sst-2-english")
+
+  # Create a new column 'Sentiment' initialized with empty strings
+  df['Sentiment'] = ""
+  df['Sentiment Score'] = ""
+
+  # Iterate through the DataFrame and perform sentiment analysis
+  for index, row in df.iterrows():
+    # Get the comment text
+    text = row['Comment']
+    
+    # Truncate the text to the maximum sequence length
+    max_length = 512  # Adjust if needed based on the model's limit
+    if len(text) > max_length:
+      text = text[:max_length]
+
+    # Perform sentiment analysis
+    result = sentiment_analyzer(text)[0]
+    label = result['label']
+    score = result['score']
+
+    # Assign sentiment label with a custom threshold for Neutral
+    if score > 0.6:
+      sentiment = "Positive"
+    elif score < 0.4:
+      sentiment = "Negative"
+    else:
+      sentiment = "Neutral"
+
+    # Update the column with the sentiment label
+    df.at[index, 'Sentiment'] = sentiment
+    df.at[index, 'Sentiment Score'] = score
+  
   return df
