@@ -149,14 +149,41 @@ def Sentiment_Analysis(df):
 
     # Assign sentiment label with a custom threshold for Neutral
     if score > 0.6:
-      sentiment = "Positive"
+      sentiment = "POSITIVE"
     elif score < 0.4:
-      sentiment = "Negative"
+      sentiment = "NEGATIVE"
     else:
-      sentiment = "Neutral"
+      sentiment = "NEUTRAL"
 
     # Update the column with the sentiment label
     df.at[index, 'Sentiment'] = sentiment
     df.at[index, 'Sentiment Score'] = score
   
+  return df
+
+
+
+# ---|   Functions for Cleaning Columns   |---
+def YT_Clean_Column(df):
+  # Drop columns
+  df = df.drop(columns = ['ID', 'Username', 'Video ID', 'Sentiment'])
+
+  # Rename Columns
+  df = df.rename(columns = {
+      'Comment': 'Content',
+      'Video Title': 'Context'
+  })
+
+  return df
+
+def RDT_Clean_Column(df):
+  # Drop columns
+  df = df.drop(columns = ['ID', 'Username', 'Post URL', 'Sentiment'])
+
+  # Rename Columns
+  df = df.rename(columns = {
+      'Comment': 'Content',
+      'Post Title': 'Context'
+  })
+
   return df
