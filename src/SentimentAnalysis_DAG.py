@@ -95,3 +95,47 @@ with DAG(
         RDT_dataframe = RDT_Organize_Column(RDT_dataframe)
 
         return RDT_dataframe
+    
+
+
+    # Task: Combine YouTube and Reddit dataframes
+    def Combine_Dataframes(YT_df, RDT_df):
+        Combined_Dataframe = pd.concat([YT_df, RDT_df], ignore_index = True)
+
+        return Combined_Dataframe
+    
+
+
+    # Airflow Tasks
+    extract_youtube_task = PythonOperator(
+        task_id = 'Extract_Comments_from_YouTube'
+        python_callable = Extract_Comments_from_YouTube
+    )
+
+    extract_reddit_task = PythonOperator(
+        task_id = 'Extract_Comments_from_Reddit'
+        python_callable = Extract_Comments_from_Reddit
+    )
+
+    transform_youtube_task = PythonOperator(
+        task_id = 'Transform_YouTube_Comments'
+        python_callable = Transform_YouTube_Comments
+        op_args = [extract_youtube_task.output]
+    )
+
+    transform_reddit_task = PythonOperator(
+        task_id = 'Transform_Reddit_Comments'
+        python_callable = Transform_Reddit_Comments
+        op_args = [extract_reddit_task.output]
+    )
+
+    combine_task = PythonOperator(
+        task_id = 'Combine_Dataframes'
+        python_callable = Combine_Dataframes
+        op_args = [transform_youtube_task.output, transform_reddit_task.output]
+    )
+
+
+
+    # Set Task Dependencies
+    [extract_youtube_task, extract_reddit_task] >> [transform_youtube_task, transform_reddit_task] >> combine_task
