@@ -32,7 +32,7 @@ from ETL_Functions.Transform_Functions import (
     RDT_Organize_Column
 )
 
-from ETL_Functions.Load_Functions import Load_Dataframe_To_PostgreSQL
+from ETL_Functions.Load_Functions import (Load_Dataframe_To_PostgreSQL, Load_To_PostgreSQL)
 
 
 
@@ -118,7 +118,11 @@ def Load_Data_To_PostgreSQL(df_json):
     df = pd.read_json(df_json)
     logging.info(f"Shape of Combined DataFrame: {df.shape}")
 
-    Load_Dataframe_To_PostgreSQL(df, table_name, POSTGRESQL_HOST, POSTGRESQL_PORT, POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE)
+    # Use the connection ID defined in Airflow UI
+    postgres_conn_id = "postgres_db"
+    Load_To_PostgreSQL(df, table_name, postgres_conn_id)
+
+    # Load_Dataframe_To_PostgreSQL(df, table_name, POSTGRESQL_HOST, POSTGRESQL_PORT, POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE)
 
 
 

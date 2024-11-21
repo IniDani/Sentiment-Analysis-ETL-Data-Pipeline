@@ -1,8 +1,10 @@
 import pandas as pd
 from sqlalchemy import create_engine
+from airflow.hooks.postgres_hook import PostgresHook
 import urllib.parse
 import logging
 
+# The function below has no purpose, it's just for documentation purposes
 def Load_Dataframe_To_PostgreSQL(df, table_name, host, port, user, password, database):
     # connection_string = "postgresql://DanFaRa%40rekdatsentimenanalysis:Qwerty123@rekdatsentimenanalysis.postgres.database.azure.com:5432/sentiment_analysis_etl?sslmode=require"
     # engine = create_engine(connection_string)
@@ -76,3 +78,37 @@ def Load_Dataframe_To_PostgreSQL(df, table_name, host, port, user, password, dat
     #     logging.info(f"Data successfully loaded into the {table_name} table.")
     # except Exception as e:
     #     logging.error(f"Error loading data into PostgreSQL: {e}")
+
+
+
+
+def Load_To_PostgreSQL(df, table_name, postgres_conn_id):
+    try:
+        # Initialize PostgresHook with the connection ID
+        postgres_hook = PostgresHook(postgres_conn_id = postgres_conn_id)
+        
+        # Get the connection and cursor
+        connection = postgres_hook.get_conn()
+        cursor = connection.cursor()
+
+        # Log the connection being used
+        logging.info(f"Using Postgres connection: {postgres_conn_id}")
+        
+        # Iterate through DataFrame rows and execute INSERT queries
+        for index, row in df.iterrows():
+            insert_query = f"""
+            INSERT INTO {table_name} (content, context, sentiment_score)
+            VALUES (%s, %s, %s);
+            """
+            cursor.execute(insert_query, (row['Content'], row['Context'], row['Sentiment Score']))
+        
+        # Commit the transaction
+        connection.commit()
+        logging.info(f"Data successfully loaded into the {table_name} table.")
+
+        # Close the cursor and connection
+        cursor.close()
+        connection.close()
+    except Exception as e:
+        logging.error(f"Error loading data into PostgreSQL: {e}")
+        raise
