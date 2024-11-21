@@ -3,6 +3,8 @@ from airflow.operators.python import PythonOperator
 from airflow.operators.dummy import DummyOperator
 from datetime import datetime
 import pandas as pd
+import logging
+import json
 
 from Credentials import YOUTUBE_API_KEY
 from Credentials import REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USER_AGENT
@@ -41,7 +43,7 @@ from ETL_Functions.Load_Functions import Load_Dataframe_To_PostgreSQL
 
 
 # Define Utility Functions
-def Extract_Comments_from_YouTube():
+def Extract_Comments_from_YouTube(video_id):
     from googleapiclient.discovery import build
 
     youtube = build('youtube', 'v3', developerKey = YOUTUBE_API_KEY)
@@ -60,39 +62,62 @@ def Extract_Comments_from_Reddit(post_url):
     return Extract_Reddit_Comments(post_url, reddit)
 
 def Transform_YouTube_Comments(YT_comments):
+    YT_comments = json.loads(YT_comments)
+    logging.info(f"Raw YouTube comments input: {YT_comments}")
+
     YT_comments = YT_Convert_Emoji_to_Text(YT_comments)
     YT_comments = YT_HandleHTML(YT_comments)
+    logging.info("Done cleaning raw data")
 
     YT_dataframe = YTcomments_to_Dataframe(YT_comments)
+    logging.info("Done converting to dataframe")
     YT_dataframe = YTcolumn_to_string(YT_dataframe)
     YT_dataframe = remove_first_character_in_username(YT_dataframe)
+    logging.info("Done cleaning dataframe")
 
     # Sentiment Analysis
     YT_dataframe = Sentiment_Analysis(YT_dataframe)
+    logging.info("Done analyzing sentiment")
     YT_dataframe = YT_Organize_Column(YT_dataframe)
 
-    return YT_dataframe
+    return YT_dataframe.to_json()
 
 def Transform_Reddit_Comments(RDT_comments):
+    RDT_comments = json.loads(RDT_comments)
+    logging.info(f"Raw Reddit comments input: {RDT_comments}")
+
     RDT_comments = RDT_Convert_Emoji_to_Text(RDT_comments)
     RDT_comments = RDT_HandleHTML(RDT_comments)
 
     RDT_dataframe = RDTcomments_to_Dataframe(RDT_comments)
+    logging.info(f"Shape of Reddit DataFrame: {RDT_dataframe.shape}")
     RDT_dataframe = RDTcolumn_to_string(RDT_dataframe)
         
     # Sentiment Analysis
     RDT_dataframe = Sentiment_Analysis(RDT_dataframe)
     RDT_dataframe = RDT_Organize_Column(RDT_dataframe)
 
-    return RDT_dataframe
+    logging.info(f"Shape of Reddit DataFrame: {RDT_dataframe.shape}")
 
-def Combine_Dataframes(YT_df, RDT_df):
+    return RDT_dataframe.to_json()
+
+def Combine_Dataframes(YT_df_json, RDT_df_json):
+    YT_df = pd.read_json(YT_df_json)
+    logging.info(f"Shape of YT DataFrame: {YT_df.shape}")
+
+    RDT_df = pd.read_json(RDT_df_json)
+    logging.info(f"Shape of RDT DataFrame: {RDT_df.shape}")
+
     Combined_Dataframe = pd.concat([YT_df, RDT_df], ignore_index = True)
+    logging.info(f"Shape of Combined DataFrame: {Combined_Dataframe.shape}")
+    
+    return Combined_Dataframe.to_json()
 
-    return Combined_Dataframe
-
-def Load_Data_To_PostgreSQL(df):
+def Load_Data_To_PostgreSQL(df_json):
     table_name = 'data_etl'
+    df = pd.read_json(df_json)
+    logging.info(f"Shape of Combined DataFrame: {df.shape}")
+
     Load_Dataframe_To_PostgreSQL(df, table_name, POSTGRESQL_HOST, POSTGRESQL_PORT, POSTGRESQL_USER, POSTGRESQL_PASSWORD, POSTGRESQL_DATABASE)
 
 
@@ -188,4 +213,4 @@ with DAG(
     start_task >> [get_video_id_task, get_reddit_url_task]
     get_video_id_task >> extract_youtube_task >> transform_youtube_task >> combine_task
     get_reddit_url_task >> extract_reddit_task >> transform_reddit_task >> combine_task
-    # combine_task >> load_task
+    combine_task >> load_task

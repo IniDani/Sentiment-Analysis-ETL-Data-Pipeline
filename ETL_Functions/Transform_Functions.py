@@ -3,12 +3,20 @@ from transformers import pipeline
 import html
 import emoji
 import pandas as pd
+import logging
 
 # ---|   Functions to convert emojis in comments to text   |---
 def YT_Convert_Emoji_to_Text(comments):
   converted_comments = []
 
-  for comment, username, video_title, video_id in comments:
+  for com in comments:
+    if len(com) != 4:
+      continue
+
+    comment = com[0]
+    username = com[1]
+    video_title = com[2]
+    video_id = com[3]
     # Convert emojis in the comment to text descriptions
     converted_comment = emoji.demojize(comment)
     converted_comments.append((converted_comment, username, video_title, video_id))
@@ -16,9 +24,17 @@ def YT_Convert_Emoji_to_Text(comments):
   return converted_comments
 
 def RDT_Convert_Emoji_to_Text(comments):
+  comments = [tuple(comment) for comment in comments]
   converted_comments = []
+  
+  for com in comments:
+    if len(com) != 4:
+      continue
 
-  for comment_text, username, post_title, post_url in comments:
+    comment_text = com[0]
+    username = com[1]
+    post_title = com[2]
+    post_url = com[3]
     # Convert emojis in the comment to text descriptions
     converted_comment = emoji.demojize(comment_text)
     converted_comments.append((converted_comment, username, post_title, post_url))
@@ -126,7 +142,7 @@ def remove_first_character_in_username(df):
 
 # ---|   Functions for Sentiment Analysis   |---
 def Sentiment_Analysis(df):
-  sentiment_analyzer = pipeline("sentiment-analysis", model = "distilbert-base-uncased-finetuned-sst-2-english")
+  sentiment_analyzer = pipeline("sentiment-analysis", model = "distilbert-base-uncased-finetuned-sst-2-english", framework = "pt")
 
   # Create a new column 'Sentiment' initialized with empty strings
   df['Sentiment'] = ""

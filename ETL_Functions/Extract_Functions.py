@@ -1,4 +1,5 @@
 import logging
+import json
 
 # Function to get the next YouTube video ID from the file
 def Get_Next_Video_ID():
@@ -82,30 +83,33 @@ def Extract_YT_Comments(video_id, youtube):
     next_page_token = response.get('nextPageToken')
     if not next_page_token:
       break
+    
+  print(f"YT_comments: {comments}")
 
-  return comments
+  return json.dumps(comments)
 
 
 
 # Function to Extract Comments from a Reddit Post
 def Extract_Reddit_Comments(post_url, reddit_client):
-  # Initialize a list to store the data
-  comments_data = []
+    # Initialize a list to store the data
+    comments_data = []
 
-  # Get the submission (post) from the provided URL
-  submission = reddit_client.submission(url = post_url)
+    # Get the submission (post) from the provided URL
+    submission = reddit_client.submission(url = post_url)
 
-  # Extract the post title
-  post_title = submission.title
+    # Extract the post title
+    post_title = submission.title
 
-  # Replace "More Comments" to simplify and fetch all comments
-  submission.comments.replace_more(limit = 0)
+    # Replace "More Comments" to simplify and fetch all comments
+    submission.comments.replace_more(limit = 0)
 
-  # Iterate through each comment and collect the data
-  for comment in submission.comments.list():
-    # Extract the comment text, post title, and username
-    comment_text = comment.body
-    username = comment.author.name if comment.author else "Anonymous"
-    comments_data.append((comment_text, username, post_title, post_url))
+    # Iterate through each comment and collect the data
+    for comment in submission.comments.list():
+        # Extract the comment text, post title, and username
+        comment_text = comment.body
+        username = comment.author.name if comment.author else "Anonymous"
+        comments_data.append((comment_text, username, post_title, post_url))
 
-  return comments_data
+    logging.info(f"Raw Reddit comments input: {comments_data}")
+    return json.dumps(comments_data)
