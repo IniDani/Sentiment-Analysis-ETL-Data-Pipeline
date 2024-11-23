@@ -6,6 +6,8 @@
 3. Raudha Nur Hidayatullah Susanto (22/500044/TK/54789)
 
 ## Link
-[Link Presentasi](https://youtu.be/OaLPMtMRO20)
+[Link Video Demonstrasi Data Pipeline](https://youtu.be/PlTHbktyJY0)
+
+[Link Video Presentasi](https://youtu.be/OaLPMtMRO20)
 
 [Link Notion](https://angry-fight-888.notion.site/Artikel-Sentiment-Analysis-Data-Pipeline-144fdade05f0800e9840fa79f7b59d6e?pvs=4)
